@@ -27,6 +27,7 @@ const Catalog = React.memo(() => {
                 setCatalog([]);
                 setCatalogCar([])
             }
+            
             setLoading(false);
         }).catch(error => {
             setCatalog([]);

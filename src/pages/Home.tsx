@@ -17,17 +17,11 @@ import iconSoup from '../assets/icons/soup.svg';
 import iconJuice from '../assets/icons/juice.svg';
 import iconMilkshake from '../assets/icons/milkshake.svg';
 import iconSnack from '../assets/icons/snack.svg';
+import Loading from "../components/Loading";
+import defaultImageProfile from '../assets/icons/default-image-profile.svg';
+import EmptyState from "../components/EmptyState";
 
 const Home = React.memo(() => {
-    const [slugSelected, setSlugSelected] = useState('all');
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [image, setImage] = useState('');
-    const [category, setCategory] = useState<CategoryModel[]>([]);
-    const [product, setProduct] = useState<ProductModel[]>([]);
-
-    const selectCategory = (slug: string) => setSlugSelected(slug);
-
     const categories : Array<CategoryModel> = [
         {slug: 'all', kategori:'Semua', icon: iconAll},
         {slug: 'appetizer',kategori:'Appetizer', icon: iconAppetizer},
@@ -41,6 +35,33 @@ const Home = React.memo(() => {
         {slug: 'milkshake', kategori:'Milkshake',icon: iconMilkshake},
         {slug: 'snack',kategori:'Snack', icon: iconSnack},
     ]
+
+    const [loading, setLoading] = useState(true);
+    const [slugSelected, setSlugSelected] = useState('all');
+    const [name, setName] = useState('Loading nama toko ...');
+    const [address, setAddress] = useState('Loading informasi alamat toko ...');
+    const [image, setImage] = useState('');
+    const [category, setCategory] = useState<CategoryModel[]>(categories);
+    const [product, setProduct] = useState<ProductModel[]>([]);
+
+    const getProductData = async (slug : string = 'all') => {
+        setProduct([]);
+        setLoading(true);
+        axios.get(`${dataproduct}/produk?kategori=${slug}`)
+        .then(response => {
+            let result = response.data;
+            console.log(result);
+            setLoading(false);
+        }).catch(error => {
+            console.log(error);
+            setLoading(false);
+        });
+    }
+
+    const selectCategory = (slug: string) => {
+        setSlugSelected(slug)
+        getProductData(slug)
+    };
 
     interface CategoryProps {
         category : CategoryModel
@@ -67,46 +88,43 @@ const Home = React.memo(() => {
     }
     const ProductContent = (data : ProductProps) => {
         return (
-            <a onClick={() => {}} title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
+            <a onClick={() => {}} href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
+                <p className="caption m-0 text-product-badge">{data.product.badge}</p>
                 <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.img_cover})`}}></div>
-                <p className="bodytext1 color-black800 semibold m-0 px-2">{data.product.nama}</p>
-                <p className="bodytext2 color-black300 m-0 px-2">{data.product.deskripsi}</p>
-                <p className="caption color-green500 m-0 py-1 px-2">{data.product.harga}</p>
+                <p className="bodytext1 color-green900 semibold m-0">{data.product.nama}</p>
+                <p className="caption color-green800 max-line-2 mx-0 my-1">{data.product.deskripsi}</p>
+                <p className="bodytext2 color-green900 font-weight-bold m-0">{data.product.harga}</p>
             </a>
         );
     };
 
-    const getData = async () => {
+    const getInformationData = async () => {
+        setLoading(true);
         axios.get(dataproduct)
         .then(response => {
             let result = response.data;
+            // setName(result.nama_resto);
+            // setAddress(result.alamat);
+            setProduct(result.data_menu_all);
             console.log(result);
-            
-            try {
-                setName(result.nama_resto);
-                setAddress(result.alamat);
-                setProduct(result.data_menu_all);
-                
-            } catch (error) {
-                console.log(error);
-            }
+            setLoading(false);
         }).catch(error => {
             console.log(error);
+            setLoading(false);
         });
     }
 
     useEffect(() => {
-        getData();
         setCategory(categories);
+        getInformationData();
     }, []);
-
 
     return (
         <main role="main" className="container-fluid col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 pt-0 pl-0 pr-0">
             <div style={{backgroundImage : `url(${imgBackground})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right'}} className="container-user d-flex flex-row justify-content-between align-items-center px-3 py-3 background-green500">
                 <Link className="content-image-profile flex-shrink" to="#" title="profile">
                     <div className="frame-image">
-                        <img src={image !== '' ? image : 'https://s3-media0.fl.yelpcdn.com/bphoto/xkaL_zwC8TFAVkPr6Q25eg/348s.jpg'} alt="profile" id="dataImage" title="image-profile"/>
+                        <img src={image !== '' ? image : defaultImageProfile} alt="profile" id="dataImage" title="image-profile"/>
                     </div>
                 </Link>
 
@@ -121,15 +139,18 @@ const Home = React.memo(() => {
             </div>
 
             <div className="section-product w-100">
-                <div className="container-category d-flex justify-content-start d-flex w-100 flex-wrap px-4 py-4">
+                <div className="product-divider w-100"></div>
+                <div className="container-category d-flex justify-content-start d-flex w-100 flex-wrap px-4 pt-4 pb-2">
                     <h1 className="headline5 color-green900 font-weight-bold p-0 m-0">
                         Kategori Menu
                     </h1>
                     <p className="headline6 color-green900 px-0 m-0">Temukan menu favorit kamu di sini!</p>
                     {category.length > 0 && <Category/>}
                 </div>
-                <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2">
-                    {product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
+                {loading && <Loading/>}
+                {!loading && product.length === 0 && <EmptyState/>}
+                <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-3">
+                    {!loading && product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
                 </div>
             </div>
             

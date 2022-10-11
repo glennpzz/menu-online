@@ -9,7 +9,7 @@
 	z-index: 99;
 	will-change: transform;
 	transform: translateZ(0);
-	box-shadow: 0 0.125rem 1rem 1px rgb(0 0 0 / 8%) !important;
+	box-shadow: 0 0 0 0 rgb(0 0 0 / 8%) !important;
 	/* border-radius: 8px 8px 0px 0px; */
 }
 .bottom-nav-buy {
@@ -141,12 +141,8 @@
 	padding-top: 10px;
 	padding-bottom: 8px;
 	color: #32a02d !important;
-	background-color: #e5ffd2 !important;
+	background-color: transparent !important;
 	border-radius: 56px;
 	margin-left: -34px;
-}
-
-.bottom-nav {
-	border-radius: 20px 20px 0px 0px !important;
 }
 /* end custom style navigation */

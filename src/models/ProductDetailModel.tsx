@@ -1,6 +1,6 @@
-export default interface ProductModel {
+export default interface ProductDetailModel {
     id: number;
-    cover : string;
+    cover : Array<String>;
     nama : string;
     harga : string;
     deskripsi : string;

@@ -8,8 +8,7 @@ const Main = ({component} : Props) => {
     const Component = component;
     return (
         <>
-        <Component/>    
-        <BottomNavigation/>
+        <Component/>
         </>
     )
 }

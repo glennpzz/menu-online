@@ -67,12 +67,12 @@ const Home = React.memo(() => {
     }
     const ProductContent = (data : ProductProps) => {
         return (
-            <Link to={`/product/${data.product.id}`} title={slugify(data.product.name).toString()} className="product-items w-50 flex-column" key={data.product.id}>
-                <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.cover})`}}></div>
-                <p className="bodytext1 color-black800 semibold m-0 px-2">{data.product.name}</p>
-                <p className="bodytext2 color-black300 m-0 px-2">{data.product.description}</p>
-                <p className="caption color-green500 m-0 py-1 px-2">{data.product.price}</p>
-            </Link>
+            <a onClick={() => {}} title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
+                <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.img_cover})`}}></div>
+                <p className="bodytext1 color-black800 semibold m-0 px-2">{data.product.nama}</p>
+                <p className="bodytext2 color-black300 m-0 px-2">{data.product.deskripsi}</p>
+                <p className="caption color-green500 m-0 py-1 px-2">{data.product.harga}</p>
+            </a>
         );
     };
 
@@ -129,7 +129,7 @@ const Home = React.memo(() => {
                     {category.length > 0 && <Category/>}
                 </div>
                 <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2">
-                    {product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={product.id}/>)}
+                    {product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
                 </div>
             </div>
             

@@ -6,29 +6,58 @@ import CategoryModel from "../models/CategoryModel";
 import ProductModel from "../models/ProductModel";
 
 import imgBackground from '../assets/images/bg.png';
+import iconSalad from '../assets/icons/salad.svg';
+import iconAll from '../assets/icons/all.svg';
+import iconAppetizer from '../assets/icons/appetizer.svg';
+import iconCoffee from '../assets/icons/coffee.svg';
+import iconDessert from '../assets/icons/dessert.svg';
+import iconDrink from '../assets/icons/drink.svg';
+import iconMainCourse from '../assets/icons/main-course.svg';
+import iconSoup from '../assets/icons/soup.svg';
+import iconJuice from '../assets/icons/juice.svg';
+import iconMilkshake from '../assets/icons/milkshake.svg';
+import iconSnack from '../assets/icons/snack.svg';
 
 const Home = React.memo(() => {
+    const [slugSelected, setSlugSelected] = useState('all');
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [image, setImage] = useState('');
     const [category, setCategory] = useState<CategoryModel[]>([]);
     const [product, setProduct] = useState<ProductModel[]>([]);
 
-    interface CategoryProps{
-        category: Array<CategoryModel>
+    const selectCategory = (slug: string) => setSlugSelected(slug);
+
+    const categories : Array<CategoryModel> = [
+        {slug: 'all', kategori:'Semua', icon: iconAll},
+        {slug: 'appetizer',kategori:'Appetizer', icon: iconAppetizer},
+        {slug: 'coffee', kategori:'Coffee',icon: iconCoffee},
+        {slug: 'dessert',kategori:'Dessert', icon: iconDessert},
+        {slug: 'drink',kategori:'Drink', icon: iconDrink},
+        {slug: 'main-course',kategori:'Main Course', icon: iconMainCourse},
+        {slug: 'salad',kategori:'Salad', icon: iconSalad},
+        {slug: 'soup',kategori:'Soup', icon: iconSoup},
+        {slug: 'juice',kategori:'Juice', icon: iconJuice},
+        {slug: 'milkshake', kategori:'Milkshake',icon: iconMilkshake},
+        {slug: 'snack',kategori:'Snack', icon: iconSnack},
+    ]
+
+    interface CategoryProps {
+        category : CategoryModel
     }
-    const Category = (data : CategoryProps) => {
+
+    const CategoryItem = React.memo((data: CategoryProps) => {
         return (
-            <div className="container-brand-text">
-                <Link to="/" className="bodytext2 text-decoration-none brand-slide active" title="daftar-produk">
-                    Semua
-                </Link>
-                
-                {data.category.map((item,index) => 
-                    <Link to={'/menu/'+item.slug} title={`menu-${item.kategori}`} className="bodytext2 text-decoration-none flex-column brand-slide" key={item.slug}>
-                        {item.kategori}
-                    </Link>
-                )}
+            <a onClick={() => selectCategory(data.category.slug)} className={`bodytext1 text-decoration-none brand-slide ${slugSelected === data.category.slug && 'active'}`} title="daftar-produk">
+                <div className="brand-icon float-left mr-1" style={{backgroundImage : `url(${data.category.icon})`}}></div> {data.category.kategori}
+            </a>
+        )
+    });
+
+    const Category = () => {
+        return (
+            <div className="container-brand-text mt-3">
+                {category.map((category, index) => <CategoryItem category={category} key={index}/>)}
             </div>
         )
     }
@@ -56,7 +85,7 @@ const Home = React.memo(() => {
             try {
                 setName(result.nama_resto);
                 setAddress(result.alamat);
-                setCategory(result.data_kategori);
+                setProduct(result.data_menu_all);
                 
             } catch (error) {
                 console.log(error);
@@ -68,6 +97,7 @@ const Home = React.memo(() => {
 
     useEffect(() => {
         getData();
+        setCategory(categories);
     }, []);
 
 
@@ -96,7 +126,7 @@ const Home = React.memo(() => {
                         Kategori Menu
                     </h1>
                     <p className="headline6 color-green900 px-0 m-0">Temukan menu favorit kamu di sini!</p>
-                    {category.length > 0 && <Category category={category}/>}
+                    {category.length > 0 && <Category/>}
                 </div>
                 <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-2 py-2">
                     {product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={product.id}/>)}

@@ -265,10 +265,18 @@ input.middle:focus {
 }
 /* end custom search component */
 .brand-slide {
-	height: 44px !important;
-	border-radius: 12px !important;
+	background-color: #efeee5;
+	height: 40px !important;
+	border-radius: 8px !important;
 	padding-left: 6px;
 	padding-right: 6px;
+	color: #213f12;
+	font-weight: 600;
+	margin: 0px 8px 0px 0px !important;
+}
+.brand-icon {
+	width: 24px;
+	height: 24px;
 }
 .brand-slide p {
 	padding-top: 0px !important;
@@ -294,11 +302,13 @@ input.middle:focus {
 	scrollbar-width: none;
 }
 .brand-slide.active {
-	background: #32a02d !important;
+	background: #fff !important;
+	font-weight: 700;
+	color: #213f12;
 }
 .container-brand-text a {
 	display: inline-block;
-	padding: 12px 16px 11px 16px !important;
+	padding: 8px 16px 8px 16px !important;
 }
 .section-product {
 	background: #70b44e;

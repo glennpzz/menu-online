@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { getCatalogCar, setCatalogCar } from "../helper/session";
 import {Helmet} from "react-helmet";
 import { safeString } from "../helper/others";
-import CatalogModel from "../models/CatalogModel";
 
 const Catalog = React.memo(() => {
     const [catalog, setCatalog] = useState(getCatalogCar());
@@ -27,7 +26,7 @@ const Catalog = React.memo(() => {
                 setCatalog([]);
                 setCatalogCar([])
             }
-            
+
             setLoading(false);
         }).catch(error => {
             setCatalog([]);

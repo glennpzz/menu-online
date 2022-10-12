@@ -20,6 +20,8 @@ import iconSnack from '../assets/icons/snack.svg';
 import Loading from "../components/Loading";
 import defaultImageProfile from '../assets/icons/default-image-profile.svg';
 import EmptyState from "../components/EmptyState";
+import ProductDetailModel from "../models/ProductDetailModel";
+import ImageSliderNav from "../components/ImageSliderNav";
 
 const Home = React.memo(() => {
     const categories : Array<CategoryModel> = [
@@ -36,6 +38,19 @@ const Home = React.memo(() => {
         {slug: 'snack',kategori:'Snack', icon: iconSnack},
     ]
 
+    const product1 : ProductDetailModel = {
+        id: 1,
+        cover : [
+            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg",
+            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg",
+            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg"
+        ],
+        nama : 'Burger',
+        harga : 'Rp. 20.000',
+        deskripsi : 'Burger dengan bahan terbaik',
+        badge : 'Terlaris',
+    }
+
     const [loading, setLoading] = useState(true);
     const [slugSelected, setSlugSelected] = useState('all');
     const [name, setName] = useState('Loading nama toko ...');
@@ -43,13 +58,17 @@ const Home = React.memo(() => {
     const [image, setImage] = useState('');
     const [category, setCategory] = useState<CategoryModel[]>(categories);
     const [product, setProduct] = useState<ProductModel[]>([]);
+    const [productDetail, setProductDetail] = useState(product1);
 
-    const getProductData = async (slug : string = 'all') => {
+    const filterProduct = async (slug : string = 'all') => {
         setProduct([]);
         setLoading(true);
         axios.get(`${dataproduct}/produk?kategori=${slug}`)
         .then(response => {
             let result = response.data;
+            if(result.status){
+                setProduct(result.data);
+            }
             console.log(result);
             setLoading(false);
         }).catch(error => {
@@ -60,7 +79,7 @@ const Home = React.memo(() => {
 
     const selectCategory = (slug: string) => {
         setSlugSelected(slug)
-        getProductData(slug)
+        filterProduct(slug)
     };
 
     interface CategoryProps {
@@ -88,10 +107,10 @@ const Home = React.memo(() => {
     }
     const ProductContent = (data : ProductProps) => {
         return (
-            <a onClick={() => {}} href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
-                <p className="caption m-0 text-product-badge">{data.product.badge}</p>
-                <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.img_cover})`}}></div>
-                <p className="bodytext1 color-green900 semibold m-0">{data.product.nama}</p>
+            <a onClick={() => {}} data-toggle="modal" data-target="#ModalSlide" href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
+                {data.product.badge !== '' && data.product.badge !== undefined && <p className="caption m-0 text-product-badge">{data.product.badge}</p>}
+                <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.cover})`}}></div>
+                <p className="bodytext1 color-green900 max-line-2 semibold m-0">{data.product.nama}</p>
                 <p className="caption color-green800 max-line-2 mx-0 my-1">{data.product.deskripsi}</p>
                 <p className="bodytext2 color-green900 font-weight-bold m-0">{data.product.harga}</p>
             </a>
@@ -103,9 +122,24 @@ const Home = React.memo(() => {
         axios.get(dataproduct)
         .then(response => {
             let result = response.data;
-            // setName(result.nama_resto);
-            // setAddress(result.alamat);
+            setName(result.nama_resto);
+            setAddress(result.alamat);
             setProduct(result.data_menu_all);
+            console.log(result);
+            setLoading(false);
+        }).catch(error => {
+            console.log(error);
+            setLoading(false);
+        });
+    }
+
+    const getProductDetail = async (id : number) => {
+        axios.get(`${dataproduct}/produk/detail?id=${id}`)
+        .then(response => {
+            let result = response.data;
+            if(result.status){
+                setProductDetail(result.data);
+            }
             console.log(result);
             setLoading(false);
         }).catch(error => {
@@ -117,6 +151,7 @@ const Home = React.memo(() => {
     useEffect(() => {
         setCategory(categories);
         getInformationData();
+        getProductDetail(1);
     }, []);
 
     return (
@@ -129,10 +164,10 @@ const Home = React.memo(() => {
                 </Link>
 
                 <div className="content-text flex-column w-100">
-                    <h1 className="headline6 text-white semibold p-0 m-0">
+                    <h1 className="headline6 text-white semibold p-0 m-0 max-line-2">
                         {name !== '' ? name : 'Nama Resto'}
                     </h1>
-                    <p className="bodytext2 text-white p-0 m-0" id="dataName">
+                    <p className="bodytext2 text-white p-0 m-0 max-line-2" id="dataName">
                         {address !== '' ? address : 'Jalan Kutamaya Kotakulon No 10 Sumedang Selatan, Sumedang'}
                     </p>
                 </div>
@@ -154,6 +189,38 @@ const Home = React.memo(() => {
                 </div>
             </div>
             
+            {/* modal */}
+            <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mx-auto" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header d-flex flex-wrap">
+                            <h6 className="modal-title semibold headline6 color-black500" id="exampleModalLabel">Detail Menu</h6>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <i className="color-black500 fi fi-br-cross headline6"></i>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {productDetail.cover.length > 0 && <ImageSliderNav cover={productDetail.cover}/>}
+                            <p className="m-0 bodytext2 color-green500 mx-0 mt-4 pt-3 mb-0">
+                                {productDetail.badge}
+                            </p>
+                            <p className="m-0 headline5-5 color-green900 font-weight-bold m-0">
+                                {productDetail.nama}
+                            </p>
+                            <p className="m-0 bodytext1 color-green900 semibold m-0">
+                                {productDetail.harga}
+                            </p>
+                            <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
+                                Deskripsi
+                            </p>
+                            <p className="m-0 caption color-green900 m-0 pt-1">
+                            {productDetail.deskripsi}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* modal */}
         </main>
     )
 })

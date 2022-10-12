@@ -468,11 +468,6 @@ input.middle:focus {
 	margin-bottom: 8px;
 }
 
-.container-empty {
-	/* padding-top: 40%;
-	padding-bottom: 45%; */
-}
-
 .button-message {
 	border: none;
 	border-radius: 10px;
@@ -899,4 +894,41 @@ input.middle:focus {
 	position: absolute;
 	margin-left: -12px !important;
 	margin-top: -12px !important;
+}
+
+/* modal custome */
+.modal-dialog {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	max-height: 80%;
+}
+.modal-dialog-slideout {
+	margin: 0 0 0 auto;
+	/* background: #fff; */
+}
+.modal.fade .modal-dialog.modal-dialog-slideout {
+	-webkit-transform: translate(0, 100%) scale(1);
+	transform: translate(0, 100%) scale(1);
+}
+.modal.fade.show .modal-dialog.modal-dialog-slideout {
+	-webkit-transform: translate(0, 0);
+	transform: translate(0, 0);
+	display: flex;
+	align-items: stretch;
+	-webkit-box-align: stretch;
+	/* height: 100%; */
+}
+.modal.fade.show .modal-dialog.modal-dialog-slideout .modal-body {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.modal-dialog-slideout .modal-content {
+	border: 0;
+	border-radius: 18px 18px 0px 0px;
+}
+.modal-dialog-slideout .modal-header,
+.modal-dialog-slideout .modal-footer {
+	display: block;
 }

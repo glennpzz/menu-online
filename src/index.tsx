@@ -6,7 +6,6 @@ import './assets/styles/typography.css';
 import './index.css';
 import './assets/styles/style.css';
 import './assets/styles/sweetalert.mod.defuj.css';
-import './assets/styles/signin.css';
 import './assets/styles/navigation.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 

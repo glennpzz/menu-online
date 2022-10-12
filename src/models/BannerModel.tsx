@@ -1,1 +1,0 @@
-export default interface BannerModel {link : String, image : String}

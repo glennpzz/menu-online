@@ -931,4 +931,5 @@ input.middle:focus {
 .modal-dialog-slideout .modal-header,
 .modal-dialog-slideout .modal-footer {
 	display: block;
+	border-bottom: 0px solid #dee2e6;
 }

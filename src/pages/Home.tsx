@@ -38,43 +38,49 @@ const Home = React.memo(() => {
         {slug: 'snack',kategori:'Snack', icon: iconSnack},
     ]
 
-    const product1 : ProductDetailModel = {
+    const productSample : ProductDetailModel = {
         id: 1,
         cover : [
-            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg",
-            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg",
-            "https://assets-pergikuliner.com/O-07kN18K7vstuQ5ax6NUrMMyjs=/385x290/smart/https://assets-pergikuliner.com/uploads/image/picture/2148006/picture-1613553258.jpg"
+            require('../assets/icons/product-placeholder.svg'),
+            require('../assets/icons/product-placeholder.svg'),
+            require('../assets/icons/product-placeholder.svg')
         ],
-        nama : 'Burger',
-        harga : 'Rp. 20.000',
-        deskripsi : 'Burger dengan bahan terbaik',
-        badge : 'Terlaris',
+        nama : 'Memuat nama produk ...',
+        harga : 'Memuat harga produk ...',
+        deskripsi : 'Memuat deskripsi produk ...',
+        badge : 'Memuat badge produk ...',
     }
 
+    const [progress, setProgress] = useState(false);
     const [loading, setLoading] = useState(true);
     const [slugSelected, setSlugSelected] = useState('all');
-    const [name, setName] = useState('Loading nama toko ...');
-    const [address, setAddress] = useState('Loading informasi alamat toko ...');
+    const [name, setName] = useState('Sawarga Digital Indonesia');
+    const [address, setAddress] = useState('Jl. Angkrek No.53, Kotakaler, Kec. Sumedang Utara, Kabupaten Sumedang, Jawa Barat 45323');
     const [image, setImage] = useState('');
-    const [category, setCategory] = useState<CategoryModel[]>(categories);
+    const [category, setCategory] = useState<CategoryModel[]>([]);
     const [product, setProduct] = useState<ProductModel[]>([]);
-    const [productDetail, setProductDetail] = useState(product1);
+    const [productDetail, setProductDetail] = useState(productSample);
+    const [productDetailFound, setProductDetailFound] = useState(false);
 
     const filterProduct = async (slug : string = 'all') => {
         setProduct([]);
         setLoading(true);
-        axios.get(`${dataproduct}/produk?kategori=${slug}`)
-        .then(response => {
-            let result = response.data;
-            if(result.status){
-                setProduct(result.data);
-            }
-            console.log(result);
-            setLoading(false);
-        }).catch(error => {
-            console.log(error);
-            setLoading(false);
-        });
+        if(slug === 'all'){
+            getInformationData();
+        }else{
+            axios.get(`${dataproduct}/produk?kategori=${slug}`)
+            .then(response => {
+                let result = response.data;
+                if(result.status){
+                    setProduct(result.data);
+                }
+                console.log(result);
+                setLoading(false);
+            }).catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
+        }
     }
 
     const selectCategory = (slug: string) => {
@@ -87,9 +93,10 @@ const Home = React.memo(() => {
     }
 
     const CategoryItem = React.memo((data: CategoryProps) => {
+        let icon = categories.filter((item) => item.slug === data.category.slug)[0].icon;
         return (
             <a onClick={() => selectCategory(data.category.slug)} className={`bodytext1 text-decoration-none brand-slide ${slugSelected === data.category.slug && 'active'}`} title="daftar-produk">
-                <div className="brand-icon float-left mr-1" style={{backgroundImage : `url(${data.category.icon})`}}></div> {data.category.kategori}
+                <div className="brand-icon float-left mr-1" style={{backgroundImage : `url(${icon})`}}></div> {data.category.kategori}
             </a>
         )
     });
@@ -97,6 +104,9 @@ const Home = React.memo(() => {
     const Category = () => {
         return (
             <div className="container-brand-text mt-3">
+                {category.length > 0 && <CategoryItem category={
+                    {slug: 'all', kategori:'Semua', icon: iconAll}
+                } key={`all-category`}/>}
                 {category.map((category, index) => <CategoryItem category={category} key={index}/>)}
             </div>
         )
@@ -105,9 +115,10 @@ const Home = React.memo(() => {
     interface ProductProps {
         product : ProductModel
     }
+
     const ProductContent = (data : ProductProps) => {
         return (
-            <a onClick={() => {}} data-toggle="modal" data-target="#ModalSlide" href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
+            <a onClick={() => getProductDetail(data.product.id)} data-toggle="modal" data-target="#ModalSlide" href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
                 {data.product.badge !== '' && data.product.badge !== undefined && <p className="caption m-0 text-product-badge">{data.product.badge}</p>}
                 <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.cover})`}}></div>
                 <p className="bodytext1 color-green900 max-line-2 semibold m-0">{data.product.nama}</p>
@@ -125,6 +136,7 @@ const Home = React.memo(() => {
             setName(result.nama_resto);
             setAddress(result.alamat);
             setProduct(result.data_menu_all);
+            setCategory(result.data_kategori);
             console.log(result);
             setLoading(false);
         }).catch(error => {
@@ -134,24 +146,28 @@ const Home = React.memo(() => {
     }
 
     const getProductDetail = async (id : number) => {
+        setProductDetailFound(false);
+        setProgress(true);
         axios.get(`${dataproduct}/produk/detail?id=${id}`)
         .then(response => {
             let result = response.data;
             if(result.status){
                 setProductDetail(result.data);
+                setProductDetailFound(true);
+            }else{
+                setProductDetail(productSample);
+                setProductDetailFound(false);
             }
-            console.log(result);
-            setLoading(false);
+            setProgress(false);
         }).catch(error => {
-            console.log(error);
-            setLoading(false);
+            setProductDetail(productSample);
+            setProgress(false);
+            setProductDetailFound(false);
         });
     }
 
     useEffect(() => {
-        setCategory(categories);
         getInformationData();
-        getProductDetail(1);
     }, []);
 
     return (
@@ -191,7 +207,7 @@ const Home = React.memo(() => {
             
             {/* modal */}
             <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mx-auto" role="document">
+                <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12" role="document">
                     <div className="modal-content">
                         <div className="modal-header d-flex flex-wrap">
                             <h6 className="modal-title semibold headline6 color-black500" id="exampleModalLabel">Detail Menu</h6>
@@ -200,22 +216,27 @@ const Home = React.memo(() => {
                             </button>
                         </div>
                         <div className="modal-body">
-                            {productDetail.cover.length > 0 && <ImageSliderNav cover={productDetail.cover}/>}
-                            <p className="m-0 bodytext2 color-green500 mx-0 mt-4 pt-3 mb-0">
-                                {productDetail.badge}
-                            </p>
-                            <p className="m-0 headline5-5 color-green900 font-weight-bold m-0">
-                                {productDetail.nama}
-                            </p>
-                            <p className="m-0 bodytext1 color-green900 semibold m-0">
-                                {productDetail.harga}
-                            </p>
-                            <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
-                                Deskripsi
-                            </p>
-                            <p className="m-0 caption color-green900 m-0 pt-1">
-                            {productDetail.deskripsi}
-                            </p>
+                            {progress && <Loading/>}
+                            {!progress && !productDetailFound && <EmptyState title="Menu tidak ditemukan" desc="Menu yang kamu cari tidak ada"/>}
+                            {!progress && productDetailFound && <>
+                                {productDetail.cover.length > 0 && <ImageSliderNav cover={productDetail.cover}/>}
+                                <p className="m-0 bodytext2 color-green500 mx-0 mt-4 pt-3 mb-0">
+                                    {productDetail.badge}
+                                </p>
+                                <p className="m-0 headline5-5 color-green900 font-weight-bold m-0">
+                                    {productDetail.nama}
+                                </p>
+                                <p className="m-0 bodytext1 color-green900 semibold m-0">
+                                    {productDetail.harga}
+                                </p>
+                                <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
+                                    Deskripsi
+                                </p>
+                                <p className="m-0 caption color-green900 m-0 pt-1">
+                                    {productDetail.deskripsi}
+                                </p>
+                            </>}
+                            
                         </div>
                     </div>
                 </div>

@@ -91,7 +91,7 @@ input.middle:focus {
 .mySlider,
 .productSlider {
 	width: 100% !important;
-	height: 150px !important;
+	height: 180px !important;
 }
 
 .carSlider {
@@ -110,7 +110,7 @@ input.middle:focus {
 
 .swiper-slide {
 	/* width: 359px !important; */
-	width: 300px !important;
+	width: 280px !important;
 	text-align: center;
 	font-size: 18px;
 	background: transparent;
@@ -903,9 +903,10 @@ input.middle:focus {
 	left: 0;
 	right: 0;
 	max-height: 80%;
+	margin: auto !important;
 }
 .modal-dialog-slideout {
-	margin: 0 0 0 auto;
+	/* margin: 0 0 0 auto; */
 	/* background: #fff; */
 }
 .modal.fade .modal-dialog.modal-dialog-slideout {
@@ -915,10 +916,12 @@ input.middle:focus {
 .modal.fade.show .modal-dialog.modal-dialog-slideout {
 	-webkit-transform: translate(0, 0);
 	transform: translate(0, 0);
-	display: flex;
+	/* display: flex;
 	align-items: stretch;
-	-webkit-box-align: stretch;
+	-webkit-box-align: stretch; */
 	/* height: 100%; */
+	padding-right: 0px;
+	padding-left: 0px;
 }
 .modal.fade.show .modal-dialog.modal-dialog-slideout .modal-body {
 	overflow-y: auto;
@@ -931,4 +934,5 @@ input.middle:focus {
 .modal-dialog-slideout .modal-header,
 .modal-dialog-slideout .modal-footer {
 	display: block;
+	border-bottom: 0px solid #dee2e6;
 }

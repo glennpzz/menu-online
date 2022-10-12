@@ -2,6 +2,7 @@
   "name": "menu-online",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://defuj.github.io/menu-online/build",
   "dependencies": {
     "@flaticon/flaticon-uicons": "^1.7.0",
     "@lottiefiles/react-lottie-player": "^3.4.7",

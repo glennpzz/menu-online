@@ -57,7 +57,7 @@ const Home = React.memo(() => {
     const [name, setName] = useState('Sawarga Digital Indonesia');
     const [address, setAddress] = useState('Jl. Angkrek No.53, Kotakaler, Kec. Sumedang Utara, Kabupaten Sumedang, Jawa Barat 45323');
     const [image, setImage] = useState('');
-    const [category, setCategory] = useState<CategoryModel[]>(categories);
+    const [category, setCategory] = useState<CategoryModel[]>([]);
     const [product, setProduct] = useState<ProductModel[]>([]);
     const [productDetail, setProductDetail] = useState(productSample);
     const [productDetailFound, setProductDetailFound] = useState(false);
@@ -167,7 +167,6 @@ const Home = React.memo(() => {
     }
 
     useEffect(() => {
-        setCategory(categories);
         getInformationData();
     }, []);
 
@@ -208,7 +207,7 @@ const Home = React.memo(() => {
             
             {/* modal */}
             <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 mx-auto" role="document">
+                <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12" role="document">
                     <div className="modal-content">
                         <div className="modal-header d-flex flex-wrap">
                             <h6 className="modal-title semibold headline6 color-black500" id="exampleModalLabel">Detail Menu</h6>

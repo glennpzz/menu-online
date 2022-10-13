@@ -5,7 +5,7 @@ import { slugify } from "../helper/others";
 import CategoryModel from "../models/CategoryModel";
 import ProductModel from "../models/ProductModel";
 
-import imgBackground from '../assets/images/bg.png';
+import imgBackground from '../assets/icons/bg.svg';
 import iconSalad from '../assets/icons/salad.svg';
 import iconAll from '../assets/icons/all.svg';
 import iconAppetizer from '../assets/icons/appetizer.svg';
@@ -183,7 +183,7 @@ const Home = React.memo(() => {
                     <h1 className="headline6 text-white semibold p-0 m-0 max-line-2">
                         {name !== '' ? name : 'Nama Resto'}
                     </h1>
-                    <p className="bodytext2 text-white p-0 m-0 max-line-2" id="dataName">
+                    <p className="bodytext2 text-white p-0 m-0 max-line-2 pr-3" id="dataName">
                         {address !== '' ? address : 'Jalan Kutamaya Kotakulon No 10 Sumedang Selatan, Sumedang'}
                     </p>
                 </div>

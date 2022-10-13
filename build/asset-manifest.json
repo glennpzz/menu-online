@@ -1,7 +1,7 @@
 {
   "main.css": "/menu-online/build/static/css/main.f84f678f.chunk.css",
-  "main.js": "/menu-online/build/static/js/main.311c2d07.chunk.js",
-  "main.js.map": "/menu-online/build/static/js/main.311c2d07.chunk.js.map",
+  "main.js": "/menu-online/build/static/js/main.b8c383dc.chunk.js",
+  "main.js.map": "/menu-online/build/static/js/main.b8c383dc.chunk.js.map",
   "runtime~main.js": "/menu-online/build/static/js/runtime~main.14e6b458.js",
   "runtime~main.js.map": "/menu-online/build/static/js/runtime~main.14e6b458.js.map",
   "static/css/2.da176686.chunk.css": "/menu-online/build/static/css/2.da176686.chunk.css",
@@ -10,7 +10,7 @@
   "static/js/3.5d3ae9cd.chunk.js": "/menu-online/build/static/js/3.5d3ae9cd.chunk.js",
   "static/js/3.5d3ae9cd.chunk.js.map": "/menu-online/build/static/js/3.5d3ae9cd.chunk.js.map",
   "index.html": "/menu-online/build/index.html",
-  "precache-manifest.fe4f42e7d275f2abac3ce4a8823c63aa.js": "/menu-online/build/precache-manifest.fe4f42e7d275f2abac3ce4a8823c63aa.js",
+  "precache-manifest.b172ee73ff1f6f2044df0ef528a77eba.js": "/menu-online/build/precache-manifest.b172ee73ff1f6f2044df0ef528a77eba.js",
   "service-worker.js": "/menu-online/build/service-worker.js",
   "static/css/2.da176686.chunk.css.map": "/menu-online/build/static/css/2.da176686.chunk.css.map",
   "static/css/main.f84f678f.chunk.css.map": "/menu-online/build/static/css/main.f84f678f.chunk.css.map",

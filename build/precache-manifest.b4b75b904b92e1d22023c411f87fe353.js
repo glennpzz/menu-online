@@ -1,15 +1,15 @@
 self.__precacheManifest = [
   {
-    "revision": "0565a6dee3cfe52d8630",
+    "revision": "b5603a5fa798047d4dc9",
     "url": "/menu-online/build/static/css/main.f84f678f.chunk.css"
   },
   {
-    "revision": "0565a6dee3cfe52d8630",
-    "url": "/menu-online/build/static/js/main.1852abbe.chunk.js"
+    "revision": "b5603a5fa798047d4dc9",
+    "url": "/menu-online/build/static/js/main.2ebae2f1.chunk.js"
   },
   {
-    "revision": "9bfc12418c7c7c107be5",
-    "url": "/menu-online/build/static/js/runtime~main.14e6b458.js"
+    "revision": "5631af6a23c7aa229981",
+    "url": "/menu-online/build/static/js/runtime~main.5a69b72d.js"
   },
   {
     "revision": "64ab993f26792c435c9f",
@@ -20,8 +20,8 @@ self.__precacheManifest = [
     "url": "/menu-online/build/static/js/2.96efc426.chunk.js"
   },
   {
-    "revision": "ae9de2e797326c8436a7",
-    "url": "/menu-online/build/static/js/3.5d3ae9cd.chunk.js"
+    "revision": "39c7535066ffd7f7e8fb",
+    "url": "/menu-online/build/static/js/3.16e4402c.chunk.js"
   },
   {
     "revision": "df9aa7456182073ada5a4df200335e38",
@@ -84,7 +84,11 @@ self.__precacheManifest = [
     "url": "/menu-online/build/static/media/empty-menu.1b0d7a9a.svg"
   },
   {
-    "revision": "eeba2cf983a92dcfee7c42dec85e1dd4",
+    "revision": "e10a78ca9b1c6415ed98644a1f045ded",
+    "url": "/menu-online/build/static/media/sadigit.e10a78ca.svg"
+  },
+  {
+    "revision": "22d9c38c91b3d2bffd1be8ce0aee99bb",
     "url": "/menu-online/build/index.html"
   }
 ];

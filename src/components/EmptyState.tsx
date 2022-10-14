@@ -12,7 +12,7 @@ const EmptyState = React.memo(({
   imageWidth = '148px'
 } : Props) => {
     return (
-        <div className={wrapHeight ? 'container-empty d-flex justify-content-center align-items-center flex-column flex-fill py-5' : 'container-empty d-flex justify-content-center align-items-center flex-column flex-fill'}>
+        <div style={{minHeight: '400px'}} className={wrapHeight ? 'container-empty d-flex justify-content-center align-items-center flex-column flex-fill py-5' : 'container-empty d-flex justify-content-center align-items-center flex-column flex-fill'}>
           <img src={require('../assets/icons/empty-menu.svg')} alt="empty" title="empty" className="img-empty h-100 mx-5 my-4" style={{width: `${imageWidth}`}}/>
           <div className="empty-text text-center">
             {title !== '' && <p className="headline6 color-green900 semibold m-0 px-3" id="title-not-found" dangerouslySetInnerHTML={{__html:title.toString()}}></p>}

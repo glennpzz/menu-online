@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import BottomNavigation from '../components/BottomNavigation';
+import Footer from "../components/Footer";
 
 interface Props {
     component : React.ElementType
@@ -9,6 +10,7 @@ const Main = ({component} : Props) => {
     return (
         <>
         <Component/>
+        <Footer/>
         </>
     )
 }

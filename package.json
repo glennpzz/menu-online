@@ -2,7 +2,7 @@
   "name": "menu-online",
   "version": "1.0.3",
   "private": true,
-  "homepage": "https://defuj.github.io/menu-online/build",
+  "homepage": "https://daftarmenu.com/resto",
   "dependencies": {
     "@flaticon/flaticon-uicons": "^1.7.0",
     "@lottiefiles/react-lottie-player": "^3.4.7",

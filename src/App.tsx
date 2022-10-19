@@ -12,7 +12,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Main component={Home}/>} />
-      <Route path="/*" element={<Navigate to="/" replace={true}/>} /> 
+      <Route path="/:resto" element={<Main component={Home}/>} />
     </Routes>
   );
 }

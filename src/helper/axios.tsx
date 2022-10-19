@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 export default axios.create({
-  baseURL: `https://menuresto.mocklab.io/api/v1/resto/`,
+  baseURL: `https://dashboard.daftarmenu.com/api/v1/`,
   headers: {
     'X-AUTH': `sdgt-smd2022`
   }
 });
 
-export const dataproduct = '614E645267556B58';
+export const products = 'produk';
+export const restaurant = 'resto';

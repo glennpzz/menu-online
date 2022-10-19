@@ -1,9 +1,4 @@
-import React, {useState, useEffect} from "react";
-import { Link } from "react-router-dom";
-
-interface Props {
-    withNavigation? : Boolean
-}
+import React from "react";
 
 const Footer = React.memo(() => {
     return (

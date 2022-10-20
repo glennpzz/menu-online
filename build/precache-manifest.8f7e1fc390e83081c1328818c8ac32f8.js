@@ -92,7 +92,7 @@ self.__precacheManifest = [
     "url": "/resto/static/media/not-found.78b0a513.svg"
   },
   {
-    "revision": "7c4b5d7dbda7a9623f14229f1898c9ae",
+    "revision": "5609c759fa2344aa202f4ebf967e2826",
     "url": "/resto/index.html"
   }
 ];

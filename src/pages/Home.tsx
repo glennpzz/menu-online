@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useSearchParams, useParams } from "react-router-dom";
 import axios, {restaurant, products} from '../helper/axios';
 import { slugify } from "../helper/others";
 import CategoryModel from "../models/CategoryModel";
 import ProductModel from "../models/ProductModel";
-import imgBackground from '../assets/icons/bg.svg';
+import imgBackground from '../assets/icons/bg_new.svg';
 import iconSalad from '../assets/icons/salad.svg';
 import iconAll from '../assets/icons/all.svg';
 import iconAppetizer from '../assets/icons/appetizer.svg';
@@ -21,9 +21,12 @@ import defaultImageProfile from '../assets/icons/default-image-profile.svg';
 import EmptyState from "../components/EmptyState";
 import ProductDetailModel from "../models/ProductDetailModel";
 import ImageSliderNav from "../components/ImageSliderNav";
+import Footer from "../components/Footer";
 
 const Home = React.memo(() => {
-    const {resto} = useParams();
+    const [params] = useSearchParams();
+    // const restoSlug = params.get('resto');
+    const {restoSlug} = useParams();
     const categories : Array<CategoryModel> = [
         {id: 0, kategori:'Semua', icon: iconAll},
         {id: 1, kategori:'Appetizer', icon: iconAppetizer},
@@ -56,21 +59,22 @@ const Home = React.memo(() => {
     const [progress, setProgress] = useState(false);
     const [loading, setLoading] = useState(true);
     const [categoryIdSelected, setCategoryIdSelected] = useState(0);
-    const [name, setName] = useState('Sedang memuat ...');
-    const [address, setAddress] = useState('Sedang memuat ...');
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState('');
     const [image, setImage] = useState('');
     const [category, setCategory] = useState<CategoryModel[]>([]);
     const [product, setProduct] = useState<ProductModel[]>([]);
     const [productDetail, setProductDetail] = useState(productSample);
     const [productDetailFound, setProductDetailFound] = useState(false);
+    const [notFoundEditing, setNotFoundEditing] = useState(true);
 
-    const filterProduct = async (slug : number = 0) => {
+    const filterProduct = (slug : number = 0) => {
         setProduct([]);
         setLoading(true);
         if(slug === 0){
             getInformationData();
         }else{
-            axios.get(`${products}?resto=${resto}&kategori=${slug}`)
+            axios.get(`${products}?resto=${restoSlug}&kategori=${slug}`)
             .then(response => {
                 let result = response.data;
                 if(result.status){
@@ -130,9 +134,9 @@ const Home = React.memo(() => {
         );
     };
 
-    const getInformationData = async () => {
+    const getInformationData = () => {
         setLoading(true);
-        axios.get(`${restaurant}/${resto}`)
+        axios.get(`${restaurant}/${restoSlug}`)
         .then(response => {
             let result = response.data;
             console.log(result);
@@ -142,6 +146,7 @@ const Home = React.memo(() => {
                 setName(data.nama_resto);
                 setAddress(data.alamat);
                 setProduct(data.data_menu_all);
+                changseSize();
 
                 let category : CategoryModel[] = data.data_kategori;
                 let newCategory : CategoryModel[] = [];
@@ -155,6 +160,7 @@ const Home = React.memo(() => {
                 
                 setCategory(newCategory);
                 setNotFound(false);
+                setLoading(false);
             }else{
                 setImage('');
                 setName('Tidak ditemukan');
@@ -162,19 +168,21 @@ const Home = React.memo(() => {
                 setCategory([]);
                 setProduct([]);
                 setNotFound(true);
-            }
+                setLoading(false);
+                changseSizeNotFound();
 
-            setLoading(false);
+                window.location.href = 'https://daftarmenu.com/resto';
+            }
         }).catch(error => {
             console.log(error);
             setLoading(false);
         });
     }
 
-    const getProductDetail = async (id : number) => {
+    const getProductDetail = (id : number) => {
         setProductDetailFound(false);
         setProgress(true);
-        axios.get(`${products}/detail?resto=${resto}&id=${id}`)
+        axios.get(`${products}/detail?resto=${restoSlug}&id=${id}`)
         .then(response => {
             let result = response.data;
             if(result.status){
@@ -192,17 +200,38 @@ const Home = React.memo(() => {
         });
     }
 
+    const changseSize = () => {
+        let height = window.innerHeight;
+        let productContainer = document.querySelector('.section-product');
+        if(productContainer !== null){
+            productContainer.setAttribute('style', `min-height: ${height-257}px`);
+        }
+    }
+
+    const changseSizeNotFound = () => {
+        let height = window.innerHeight;
+        let emptyContainer = document.querySelector('.container-empty');
+        if(notFound && emptyContainer !== null){
+            emptyContainer.setAttribute('style', `min-height: ${height-110}px`);
+            setNotFoundEditing(false);
+        }
+    }
+
     useEffect(() => {
-        if(resto === undefined){
+        console.log(restoSlug);
+        if(restoSlug === undefined){
             setNotFound(true);
             setLoading(false);
+            changseSizeNotFound();
         }else{
             getInformationData();
         }
         setStarting(false);
-    }, []);
+        changseSize();
+    }, [notFound && notFoundEditing && changseSizeNotFound]);
 
     return (
+        <>
         <main role="main" className="container-fluid col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 pt-0 pl-0 pr-0">
             {!starting && !notFound && 
             <>
@@ -214,11 +243,11 @@ const Home = React.memo(() => {
                     </Link>
 
                     <div className="content-text flex-column w-100">
-                        <h1 className="headline6 text-white semibold p-0 m-0 max-line-2">
-                            {name !== '' ? name : 'Nama Resto'}
+                        <h1 className="headline5 text-white font-weight-bold p-0 m-0 max-line-2">
+                            {name !== '' ? name : ''}
                         </h1>
                         <p className="bodytext2 text-white p-0 m-0 max-line-2 pr-3" id="dataName">
-                            {address !== '' ? address : 'Jalan Kutamaya Kotakulon No 10 Sumedang Selatan, Sumedang'}
+                            {address !== '' ? address : ''}
                         </p>
                     </div>
                 </div>
@@ -239,9 +268,12 @@ const Home = React.memo(() => {
 
                     {!loading && product.length === 0 && <EmptyState/>}
 
-                    <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-3">
-                        {!loading && product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
-                    </div>
+                    {!loading && product.length > 0 &&
+                        <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-3">
+                            {!loading && product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
+                        </div>
+                    }
+                    
                 </div>
             </>
             }
@@ -275,7 +307,7 @@ const Home = React.memo(() => {
                                 <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
                                     Deskripsi
                                 </p>
-                                <p className="m-0 caption color-green900 m-0 pt-1">
+                                <p className="m-0 caption color-green900 m-0 pt-1 pb-3">
                                     {productDetail.deskripsi}
                                 </p>
                             </>}
@@ -285,6 +317,8 @@ const Home = React.memo(() => {
             </div>
             {/* modal */}
         </main>
+        {!starting && <Footer/>}
+        </>
     )
 })
 

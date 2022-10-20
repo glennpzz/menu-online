@@ -1,18 +1,11 @@
-import React, { useEffect } from "react";
-import BottomNavigation from '../components/BottomNavigation';
-import Footer from "../components/Footer";
+import React from "react";
 
 interface Props {
     component : React.ElementType
 }
 const Main = ({component} : Props) => {
     const Component = component;
-    return (
-        <>
-        <Component/>
-        <Footer/>
-        </>
-    )
+    return (<Component/>)
 }
 
 export default Main;

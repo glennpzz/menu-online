@@ -104,3 +104,36 @@
 .swal2-icon-warning .swal2-actions .swal2-cancel {
 	color: #000 !important;
 }
+
+/* config padding loading */
+.swal2-actions.swal2-loading {
+	min-height: 100px !important;
+}
+.swal2-popup.swal2-modal.swal2-loading.swal2-show {
+	padding: 12px 0px 12px 0px !important;
+}
+
+.swal2-popup.swal2-modal.swal2-loading.swal2-show .swal2-title {
+	font-weight: 500 !important;
+	font-size: 18px !important;
+}
+
+/* html content */
+.swal2-html-container {
+	margin: 1em 0em 0em !important;
+}
+
+.swal2-popup.swal2-toast {
+	padding: 16px !important;
+}
+.swal2-popup.swal2-toast .swal2-title {
+	font-family: "Open Sans", sans-serif !important;
+	color: inherit !important;
+	margin: 0.5em 1em;
+	padding: 0;
+	font-size: 16px !important;
+	text-align: initial;
+	font-weight: 600 !important;
+	text-transform: none;
+	word-wrap: break-word;
+}

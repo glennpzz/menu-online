@@ -146,3 +146,31 @@
 	margin-left: -34px;
 }
 /* end custom style navigation */
+
+/* start custom style navigation top */
+.container-search-bar {
+	background: #fff;
+	border-radius: 12px;
+	min-height: 50px;
+}
+.container-user {
+	padding-top: 90px !important;
+}
+.badge-cart {
+	position: absolute;
+	margin-left: 30px;
+	margin-bottom: 16px;
+	width: 20px;
+	height: 20px;
+	padding-top: 5px;
+	padding-left: 2px;
+	padding-right: 2px;
+}
+.input-group-search > i {
+	margin-bottom: -6px;
+}
+.input-group-search a > i {
+	font-size: 26px !important;
+	margin-bottom: -6px;
+}
+/* end custom style navigation top */

@@ -20,7 +20,7 @@ const EmptyState = React.memo(({
           <img src={icon} alt="empty" title="empty" className="img-empty h-100 mx-5 my-4" style={{width: `${imageWidth}`}}/>
           <div className="empty-text text-center">
             {title !== '' && <p className="headline6 color-green900 semibold m-0 px-3" id="title-not-found" dangerouslySetInnerHTML={{__html:title.toString()}}></p>}
-            <p className="bodytext2 color-green800 semibold m-0 px-3" id="desc-not-found" dangerouslySetInnerHTML={{__html:desc.toString()}}></p>
+            <p style={{maxWidth: '300px'}} className="bodytext1 color-green800 semibold m-0 px-3" id="desc-not-found" dangerouslySetInnerHTML={{__html:desc.toString()}}></p>
           </div>
         </div>
     );

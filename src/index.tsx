@@ -17,7 +17,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <BrowserRouter basename='/resto/'>
+    {/* <BrowserRouter basename='/resto/'> */}
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>

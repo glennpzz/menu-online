@@ -194,6 +194,19 @@ export const getHistories = () => {
     return [];
 }
 
+export const updateCart = (data) => {
+    if (storageAvailable('localStorage')) {
+        localStorage.setItem('cart', JSON.stringify(data));
+    }
+}
+
+export const getCart = () => {
+    if (storageAvailable('localStorage')) {
+        return localStorage.getItem('cart') !== null ? JSON.parse(localStorage.getItem('cart')) : [];
+    }
+    return [];
+}
+
 export const checkDeffTime = (time1, time2) => {
     var date1 = new Date(time1);
     var date2 = new Date(time2);

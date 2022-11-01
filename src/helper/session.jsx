@@ -194,15 +194,15 @@ export const getHistories = () => {
     return [];
 }
 
-export const updateCart = (data) => {
+export const updateCart = (slug,data) => {
     if (storageAvailable('localStorage')) {
-        localStorage.setItem('cart', JSON.stringify(data));
+        localStorage.setItem(`cart-${slug}`, JSON.stringify(data));
     }
 }
 
-export const getCart = () => {
+export const getCart = (slug) => {
     if (storageAvailable('localStorage')) {
-        return localStorage.getItem('cart') !== null ? JSON.parse(localStorage.getItem('cart')) : [];
+        return localStorage.getItem(`cart-${slug}`) !== null ? JSON.parse(localStorage.getItem(`cart-${slug}`)) : [];
     }
     return [];
 }

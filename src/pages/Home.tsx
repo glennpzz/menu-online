@@ -4,7 +4,6 @@ import axios, {restaurant, products} from '../helper/axios';
 import { slugify } from "../helper/others";
 import CategoryModel from "../models/CategoryModel";
 import ProductModel from "../models/ProductModel";
-import imgBackground from '../assets/icons/bg_new.svg';
 import iconSalad from '../assets/icons/salad.svg';
 import iconAll from '../assets/icons/all.svg';
 import iconAppetizer from '../assets/icons/appetizer.svg';
@@ -28,8 +27,6 @@ import Swal from "sweetalert2";
 import { getCart, updateCart } from "../helper/session";
 
 const Home = React.memo(() => {
-    const [params] = useSearchParams();
-    // const restoSlug = params.get('resto');
     const {restoSlug} = useParams();
     const categories : Array<CategoryModel> = [
         {id: 0, kategori:'Semua', icon: iconAll},
@@ -58,6 +55,7 @@ const Home = React.memo(() => {
         badge : 'Memuat badge produk ...',
     }
 
+    const [minHeight, setMinHeight] = useState('400px');
     const [starting, setStarting] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [progress, setProgress] = useState(false);
@@ -72,6 +70,7 @@ const Home = React.memo(() => {
     const [productDetailFound, setProductDetailFound] = useState(false);
     const [notFoundEditing, setNotFoundEditing] = useState(true);
     const [cart, setCart] = useState<CartModel[]>(getCart);
+    const [cartCount, setCartCount] = useState(0);
     const [qty, setQty] = useState(1);
     const [note, setNote] = useState('');
     const [search, setSearch] = useState('');
@@ -169,6 +168,7 @@ const Home = React.memo(() => {
                 setCategory(newCategory);
                 setNotFound(false);
                 setLoading(false);
+                reCountCart();
             }else{
                 setImage('');
                 setName('Tidak ditemukan');
@@ -181,9 +181,11 @@ const Home = React.memo(() => {
 
                 window.location.href = 'https://daftarmenu.com/resto';
             }
+            setStarting(false);
         }).catch(error => {
             console.log(error);
             setLoading(false);
+            setStarting(false);
         });
     }
 
@@ -216,6 +218,13 @@ const Home = React.memo(() => {
         });
     }
 
+    const reCountCart = () => {
+        let total = 0;
+        // total qty from cart
+        total = getCart(restoSlug).reduce((total: number, item : CartModel) => total + item.qty, 0);
+        setCartCount(total);
+    }
+
     const addToCart = () => {
         let cartItem : CartModel = {
             id: productDetail.id,
@@ -227,7 +236,7 @@ const Home = React.memo(() => {
             badge: productDetail.badge,
             note: note
         }
-        let newCart : CartModel[] = cart;
+        let newCart : CartModel[] = getCart(restoSlug);
         // if(localStorage.getItem('cart') !== null){
         //     cart = JSON.parse(localStorage.getItem('cart') || '{}');
         // }
@@ -241,12 +250,12 @@ const Home = React.memo(() => {
         }
         if(qty > 0){
             setCart(newCart);
-            updateCart(newCart);
+            updateCart(restoSlug,newCart);
             const Toast = Swal.mixin({
                 toast: true,
-                position: 'top-start',
+                position: 'top-end',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 1000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -258,16 +267,17 @@ const Home = React.memo(() => {
                 icon: 'success',
                 title: 'Menu Berhasil ditambahkan'
             })   
-            console.log(cart);
-                  
+            // console.log(cart);
         }
+        reCountCart();
     }
 
     const changseSize = () => {
         let height = window.innerHeight;
         let productContainer = document.querySelector('.section-product');
         if(productContainer !== null){
-            productContainer.setAttribute('style', `min-height: ${height-257}px`);
+            productContainer.setAttribute('style', `min-height: ${height-304}px`);
+            setMinHeight(`${height-344}px`);
         }
     }
 
@@ -276,6 +286,7 @@ const Home = React.memo(() => {
         let emptyContainer = document.querySelector('.container-empty');
         if(notFound && emptyContainer !== null){
             emptyContainer.setAttribute('style', `min-height: ${height-110}px`);
+            setMinHeight(`${height-110}px`);
             setNotFoundEditing(false);
         }
     }
@@ -317,16 +328,17 @@ const Home = React.memo(() => {
             setNotFound(true);
             setLoading(false);
             changseSizeNotFound();
+            setStarting(false);
         }else{
             getInformationData();
         }
-        setStarting(false);
         changseSize();
     }, [notFound && notFoundEditing && changseSizeNotFound]);
 
     return (
         <>
-        <Navigation cart={cart} onSearch={searchMenu}/>
+        {!notFound && !starting && <Navigation cartCount={cartCount} onSearch={searchMenu}/>}
+        {!starting &&
         <main role="main" className="container-fluid col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 pt-0 pl-0 pr-0">
             {!starting && !notFound && 
             <>
@@ -361,7 +373,7 @@ const Home = React.memo(() => {
                         </div>
                     }
 
-                    {search !== '' && product.length > 0 && 
+                    {!loading && search !== '' && product.length > 0 && 
                         <div className="container-category d-flex justify-content-start d-flex w-100 flex-wrap px-4 pt-4 pb-2">
                             <h1 className="headline5 color-green900 font-weight-bold p-0 m-0 w-100">
                                 Hasil Pencarian
@@ -370,10 +382,10 @@ const Home = React.memo(() => {
                         </div>
                     }
                     
-                    {loading && <Loading/>}
+                    {loading && <Loading height={search !== '' ? minHeight : '300px'}/>}
 
                     {!loading && product.length === 0 && 
-                    <EmptyState desc={search !== '' ? 
+                    <EmptyState minHeight={minHeight} desc={search !== '' ? 
                         `Maaf “<span class="color-green500 semibold px-0 m-0">${search}</span>” tidak ditemukan coba gunakan kata kunci lain.` : 
                         'Belum ada menunya nih,</br>Silahkan tambahkan terlebih dahulu!'}/>}
 
@@ -387,7 +399,7 @@ const Home = React.memo(() => {
             </>
             }
 
-            {notFound && <EmptyState minHeight="600px" title={'Halaman yang kamu tuju tidak ditemukan.'} desc={'Mau pake linknya? <u><a href="https://daftarmenu.com" class="color-green800" target="_blank" rel="noopener noreferrer">Buat daftarmenu sekarang.</a></u>'} icon={require('../assets/icons/not-found.svg')}/>}
+            {notFound && <EmptyState minHeight={minHeight} title={'Halaman yang kamu tuju tidak ditemukan.'} desc={'Mau pake linknya? <a href="https://daftarmenu.com" class="color-green800" target="_blank" rel="noopener noreferrer"><u>Buat daftarmenu sekarang.</u></a>'} icon={require('../assets/icons/not-found.svg')}/>}
             
             {/* modal */}
             <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
@@ -433,7 +445,7 @@ const Home = React.memo(() => {
                                         </p>
                                         <div className="content-qty d-flex align-items-center flex-row">
                                             <button onClick={() => qty > 1 && setQty(qty-1)} type="button" className="btn-qty btn-qty-minus bodytext2">-</button>
-                                            <input type="number" onChange={() => {}} className="text-center input-qty bodytext2 mx-2" value={qty}/>
+                                            <input type="number" maxLength={3} max={999} min={1} onChange={() => {}} className="text-center input-qty bodytext2 mx-2" value={qty}/>
                                             <button onClick={() => setQty(qty+1)} type="button" className="btn-qty btn-qty-plus bodytext2">+</button>
                                         </div>
                                     </div>
@@ -451,6 +463,7 @@ const Home = React.memo(() => {
             </div>
             {/* modal */}
         </main>
+        }
         {!starting && <Footer/>}
         </>
     )

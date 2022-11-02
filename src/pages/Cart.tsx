@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios, {restaurant} from '../helper/axios';
 import { formatMoney, getNumber, slugify } from "../helper/others";
@@ -16,9 +16,10 @@ const Cart = React.memo(() => {
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState<CartModel[]>([]);
     const [notFoundEditing, setNotFoundEditing] = useState(true);
-    const [total, setTotal] = useState(0);
     const [customer, setCustomer] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
+    const [lastFocus, setLastFocus] = useState(0);
+    const total = useRef(0);
 
     interface CartProps {
         cart : CartModel
@@ -68,15 +69,34 @@ const Cart = React.memo(() => {
     }
 
     const updateQtyCart = (e: React.FormEvent, id: number) => {
-        const qty = (e.target as HTMLInputElement).value;
+        setLastFocus(id);
+        let qty = (e.target as HTMLInputElement).value;
+        const lastQty = cart.filter((item) => item.id === id)[0].qty;
+        (e.target as HTMLInputElement).placeholder = `${lastQty}`;
+        if(qty === ''){
+            return;
+        }
+
+        if(qty === '0'){
+            (e.target as HTMLInputElement).value = '1';
+            return;
+        }
+
+        if(qty.length > 3){
+            (e.target as HTMLInputElement).value = '999';
+            return;
+        }
 
         const newCart = getCart(restoSlug).map((item : CartModel) => {
             if(item.id === id){
                 item.qty = parseInt(qty);
+                console.log(`qty : ${parseInt(qty)}`);
             }
             return item;
         });
+
         updateCart(restoSlug,newCart);
+        setCart(newCart);
         calculateTotal();
     }
 
@@ -99,15 +119,23 @@ const Cart = React.memo(() => {
         })
     }
 
-    const calculateTotal = () => {
-        let total = 0;
-        getCart(restoSlug).forEach((item : CartModel) => {
-            total += parseFloat(item.qty.toString()) * parseFloat(getNumber(item.harga).toString());
-        });
-        setTotal(total);
+
+    const calculateTotal = (newCart : CartModel[] = []) => {
+        let newTotal = 0;
+        if(newCart.length === 0){
+            getCart(restoSlug).forEach((item : CartModel) => {
+                newTotal += parseFloat(item.qty.toString()) * parseFloat(getNumber(item.harga).toString());
+            });
+        }else{
+            newCart.forEach((item : CartModel) => {
+                newTotal += parseFloat(item.qty.toString()) * parseFloat(getNumber(item.harga).toString());
+            });
+        }
+        
+        total.current = newTotal;
     }
 
-    const CartContent = ({cart} : CartProps) => {
+    const CartContent = React.memo(({cart} : CartProps) => {
         return (
             <div title={slugify(cart.nama).toString()} className="cart-items w-100 flex-column my-2" key={cart.nama}>
                 <div className="d-flex align-items-center flex-row w-100">
@@ -117,7 +145,8 @@ const Cart = React.memo(() => {
                         <p className="bodytext2 color-green900 font-weight-bold m-0">{cart.harga}</p>
                         <div className="content-qty d-flex align-items-center flex-row mt-2">
                             <button onClick={() => cart.qty > 1 ? removeQtyCart(cart.id) : deleteCart(cart.id)} type="button" className="btn-qty btn-qty-minus bodytext2">-</button>
-                            <input type="number" maxLength={3} max={999} min={1} onKeyUp={(e) => updateQtyCart(e, cart.id)} className={`textarea-${cart.id} text-center input-qty bodytext2 mx-2`} defaultValue={cart.qty}/>
+                            {cart.id === lastFocus && <input type="number" placeholder="1" maxLength={3} max={999} min={1} onKeyUp={(e) => updateQtyCart(e, cart.id)} className={`textarea-${cart.id} text-center input-qty bodytext2 mx-2`} defaultValue={cart.qty} autoFocus/>}
+                            {cart.id !== lastFocus && <input type="number" placeholder="1" maxLength={3} max={999} min={1} onKeyUp={(e) => updateQtyCart(e, cart.id)} className={`textarea-${cart.id} text-center input-qty bodytext2 mx-2`} defaultValue={cart.qty}/>}
                             <button onClick={() => addQtyCart(cart.id)} type="button" className="btn-qty btn-qty-plus bodytext2">+</button>
                         </div>
                     </div>
@@ -128,7 +157,7 @@ const Cart = React.memo(() => {
                 <textarea className="caption m-0 w-100 mt-3" rows={1} placeholder="Tulis Catatan" onChange={(e) => updateNoteCart(e, cart.id)} defaultValue={cart.note}></textarea>
             </div>
         );
-    }
+    });
 
     const changseSize = () => {
         let height = window.innerHeight;
@@ -210,6 +239,23 @@ const Cart = React.memo(() => {
         }
     }
 
+    const resetCart = () => {
+        Swal.fire({
+            title: 'Perhatian',
+            text: "Apakah anda yakin ingin menghapus semua pesanan?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya',
+            cancelButtonText: 'Tidak',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateCart(restoSlug,[]);
+                setCart([]);
+                calculateTotal();
+            }
+        });
+    }
+
     useEffect(() => {
         changseSize();
         if(restoSlug === undefined){
@@ -225,11 +271,14 @@ const Cart = React.memo(() => {
     return (
         <>
         <nav className="navbar fixed-top background-green500 col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 m-auto">
-            <div className="d-flex justify-content-start align-items-center flex-row py-0 px-xl-3 px-lg-3 px-md-3 px-sm-3 px-3">
+            <div className="d-flex flex-row align-items-center py-0 w-100">
                 <Link to={`/${restoSlug}`} className="navbar-brand" title="back">
                     <i className="fi fi-sr-angle-left text-white headline6"></i>
                 </Link>
-                <p className="mb-0 bodytext1 semibold text-white px-2">Keranjang</p>
+                <p className="mb-0 bodytext1 semibold text-white px-2 flex-fill">Keranjang</p>
+                <a href="#" onClick={resetCart} className="navbar-brand m-auto" title="clear">
+                    <i className="fi fi-br-rotate-right text-white headline6"></i>
+                </a>
             </div>
         </nav>
         {loading && <Loading height={minHeight}/>}
@@ -268,7 +317,7 @@ const Cart = React.memo(() => {
                         Total Bayar
                     </p>
                     <p className="m-0 headline6 color-green900 semibold">
-                        Rp {formatMoney(total)}
+                        Rp {formatMoney(total.current)}
                     </p>
                 </div>
                 <button onClick={sendCart} className="button-message w-50 flex-fill bodytext1 semibold text-white d-flex flex-row justify-content-center align-items-center background-green500" type="button">

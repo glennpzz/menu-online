@@ -322,6 +322,28 @@ const Home = React.memo(() => {
         }
     }
 
+    const updateQtyCart = (e: React.FormEvent) => {
+        // setLastFocus(id);
+        let qty = (e.target as HTMLInputElement).value;
+        const lastQty = qty;
+        (e.target as HTMLInputElement).placeholder = `${lastQty}`;
+        if(qty === ''){
+            return;
+        }
+
+        if(qty === '0'){
+            (e.target as HTMLInputElement).value = '1';
+            return;
+        }
+
+        if(qty.length > 3){
+            (e.target as HTMLInputElement).value = '999';
+            return;
+        }
+
+        setQty(parseInt(qty));
+    }
+
     useEffect(() => {
         // console.log(restoSlug);
         if(restoSlug === undefined){
@@ -445,7 +467,7 @@ const Home = React.memo(() => {
                                         </p>
                                         <div className="content-qty d-flex align-items-center flex-row">
                                             <button onClick={() => qty > 1 && setQty(qty-1)} type="button" className="btn-qty btn-qty-minus bodytext2">-</button>
-                                            <input type="number" maxLength={3} max={999} min={1} onChange={() => {}} className="text-center input-qty bodytext2 mx-2" value={qty}/>
+                                            <input type="number" maxLength={3} max={999} min={1} onChange={(e) => updateQtyCart(e)} className="text-center input-qty bodytext2 mx-2" value={qty}/>
                                             <button onClick={() => setQty(qty+1)} type="button" className="btn-qty btn-qty-plus bodytext2">+</button>
                                         </div>
                                     </div>

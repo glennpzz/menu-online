@@ -4,7 +4,6 @@ import axios, {restaurant, products} from '../helper/axios';
 import { slugify } from "../helper/others";
 import CategoryModel from "../models/CategoryModel";
 import ProductModel from "../models/ProductModel";
-import imgBackground from '../assets/icons/bg_new.svg';
 import iconSalad from '../assets/icons/salad.svg';
 import iconAll from '../assets/icons/all.svg';
 import iconAppetizer from '../assets/icons/appetizer.svg';
@@ -22,10 +21,12 @@ import EmptyState from "../components/EmptyState";
 import ProductDetailModel from "../models/ProductDetailModel";
 import ImageSliderNav from "../components/ImageSliderNav";
 import Footer from "../components/Footer";
+import Navigation from "../components/Navigation";
+import CartModel from "../models/CartModel";
+import Swal from "sweetalert2";
+import { getCart, updateCart } from "../helper/session";
 
 const Home = React.memo(() => {
-    const [params] = useSearchParams();
-    // const restoSlug = params.get('resto');
     const {restoSlug} = useParams();
     const categories : Array<CategoryModel> = [
         {id: 0, kategori:'Semua', icon: iconAll},
@@ -54,6 +55,7 @@ const Home = React.memo(() => {
         badge : 'Memuat badge produk ...',
     }
 
+    const [minHeight, setMinHeight] = useState('400px');
     const [starting, setStarting] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [progress, setProgress] = useState(false);
@@ -67,6 +69,11 @@ const Home = React.memo(() => {
     const [productDetail, setProductDetail] = useState(productSample);
     const [productDetailFound, setProductDetailFound] = useState(false);
     const [notFoundEditing, setNotFoundEditing] = useState(true);
+    const [cart, setCart] = useState<CartModel[]>(getCart);
+    const [cartCount, setCartCount] = useState(0);
+    const [qty, setQty] = useState(1);
+    const [note, setNote] = useState('');
+    const [search, setSearch] = useState('');
 
     const filterProduct = (slug : number = 0) => {
         setProduct([]);
@@ -80,7 +87,7 @@ const Home = React.memo(() => {
                 if(result.status){
                     setProduct(result.data);
                 }
-                console.log(result);
+                // console.log(result);
                 setLoading(false);
             }).catch(error => {
                 console.log(error);
@@ -125,7 +132,7 @@ const Home = React.memo(() => {
     const ProductContent = (data : ProductProps) => {
         return (
             <a onClick={() => getProductDetail(data.product.id)} data-toggle="modal" data-target="#ModalSlide" href="#" title={slugify(data.product.nama).toString()} className="product-items w-50 flex-column" key={data.product.nama}>
-                {data.product.badge !== '' && data.product.badge !== undefined && data.product.badge !== null && <p className="caption m-0 text-product-badge">{data.product.badge}</p>}
+                {data.product.badge !== '' && data.product.badge !== undefined && data.product.badge !== null && <p className={data.product.badge === 'New' ? 'caption m-0 text-product-badge-new' : 'caption m-0 text-product-badge'}>{data.product.badge}</p>}
                 <div className="product-cover mb-2" style={{backgroundImage: `url(${data.product.cover})`}}></div>
                 <p className="bodytext1 color-green900 max-line-2 semibold m-0">{data.product.nama}</p>
                 <p className="caption color-green800 max-line-2 mx-0 my-1">{data.product.deskripsi}</p>
@@ -139,7 +146,7 @@ const Home = React.memo(() => {
         axios.get(`${restaurant}/${restoSlug}`)
         .then(response => {
             let result = response.data;
-            console.log(result);
+            // console.log(result);
             if(result.status){
                 const data = result.data;
                 setImage(data.cover_resto);
@@ -161,6 +168,7 @@ const Home = React.memo(() => {
                 setCategory(newCategory);
                 setNotFound(false);
                 setLoading(false);
+                reCountCart();
             }else{
                 setImage('');
                 setName('Tidak ditemukan');
@@ -173,9 +181,11 @@ const Home = React.memo(() => {
 
                 window.location.href = 'https://daftarmenu.com/resto';
             }
+            setStarting(false);
         }).catch(error => {
             console.log(error);
             setLoading(false);
+            setStarting(false);
         });
     }
 
@@ -186,6 +196,14 @@ const Home = React.memo(() => {
         .then(response => {
             let result = response.data;
             if(result.status){
+                setQty(1);
+                setNote('');
+                cart.map((item) => {
+                    if(item.id === result.data.id){
+                        setQty(item.qty);
+                        setNote(item.note);
+                    }
+                });
                 setProductDetail(result.data);
                 setProductDetailFound(true);
             }else{
@@ -200,11 +218,66 @@ const Home = React.memo(() => {
         });
     }
 
+    const reCountCart = () => {
+        let total = 0;
+        // total qty from cart
+        total = getCart(restoSlug).reduce((total: number, item : CartModel) => total + item.qty, 0);
+        setCartCount(total);
+    }
+
+    const addToCart = () => {
+        let cartItem : CartModel = {
+            id: productDetail.id,
+            nama: productDetail.nama,
+            harga: productDetail.harga,
+            qty: qty,
+            cover: productDetail.cover,
+            deskripsi: productDetail.deskripsi,
+            badge: productDetail.badge,
+            note: note
+        }
+        let newCart : CartModel[] = getCart(restoSlug);
+        // if(localStorage.getItem('cart') !== null){
+        //     cart = JSON.parse(localStorage.getItem('cart') || '{}');
+        // }
+        let index = newCart.findIndex((item) => item.id === cartItem.id);
+        if(index !== -1){
+            newCart[index].note = cartItem.note;
+            // newCart[index].qty = newCart[index].qty + cartItem.qty;
+            newCart[index].qty = cartItem.qty;
+        }else{
+            newCart.push(cartItem);
+        }
+        if(qty > 0){
+            setCart(newCart);
+            updateCart(restoSlug,newCart);
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+              
+            Toast.fire({
+                icon: 'success',
+                title: 'Menu Berhasil ditambahkan'
+            })   
+            // console.log(cart);
+        }
+        reCountCart();
+    }
+
     const changseSize = () => {
         let height = window.innerHeight;
         let productContainer = document.querySelector('.section-product');
         if(productContainer !== null){
-            productContainer.setAttribute('style', `min-height: ${height-257}px`);
+            productContainer.setAttribute('style', `min-height: ${height-304}px`);
+            setMinHeight(`${height-344}px`);
         }
     }
 
@@ -213,29 +286,85 @@ const Home = React.memo(() => {
         let emptyContainer = document.querySelector('.container-empty');
         if(notFound && emptyContainer !== null){
             emptyContainer.setAttribute('style', `min-height: ${height-110}px`);
+            setMinHeight(`${height-110}px`);
             setNotFoundEditing(false);
         }
     }
 
+    const searchMenu = (keyword : string) => {
+        setSearch(keyword);
+
+        if(keyword !== ''){
+            setLoading(true);
+            axios.get(`${restaurant}/${restoSlug}`)
+            .then(response => {
+                let result = response.data;
+                // console.log(result);
+                if(result.status){
+                    const data = result.data;
+                    setImage(data.cover_resto);
+                    setName(data.nama_resto);
+                    setAddress(data.alamat);
+                    let ref = data.data_menu_all.filter((item : ProductModel) => item.nama.toLowerCase().includes(keyword.toLowerCase()));
+                    setProduct(ref);
+                    changseSize();
+                    setNotFound(false);
+                    setLoading(false);
+                }else{
+                    window.location.href = 'https://daftarmenu.com/resto';
+                }
+            }).catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
+        }else{
+            getInformationData();
+        }
+    }
+
+    const updateQtyCart = (e: React.FormEvent) => {
+        // setLastFocus(id);
+        let qty = (e.target as HTMLInputElement).value;
+        const lastQty = qty;
+        (e.target as HTMLInputElement).placeholder = `${lastQty}`;
+        if(qty === ''){
+            return;
+        }
+
+        if(qty === '0'){
+            (e.target as HTMLInputElement).value = '1';
+            return;
+        }
+
+        if(qty.length > 3){
+            (e.target as HTMLInputElement).value = '999';
+            return;
+        }
+
+        setQty(parseInt(qty));
+    }
+
     useEffect(() => {
-        console.log(restoSlug);
+        // console.log(restoSlug);
         if(restoSlug === undefined){
             setNotFound(true);
             setLoading(false);
             changseSizeNotFound();
+            setStarting(false);
         }else{
             getInformationData();
         }
-        setStarting(false);
         changseSize();
     }, [notFound && notFoundEditing && changseSizeNotFound]);
 
     return (
         <>
+        {!notFound && !starting && <Navigation cartCount={cartCount} onSearch={searchMenu}/>}
+        {!starting &&
         <main role="main" className="container-fluid col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 pt-0 pl-0 pr-0">
             {!starting && !notFound && 
             <>
-                <div style={{backgroundImage : `url(${imgBackground})`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right'}} className="container-user d-flex flex-row justify-content-between align-items-center px-3 py-3 background-green500">
+                <div style={{backgroundRepeat: 'no-repeat', backgroundPosition: 'right bottom'}} className="container-user d-flex flex-row justify-content-between align-items-center px-3 py-3 background-green500">
                     <Link className="content-image-profile flex-shrink" to="#" title="profile">
                         <div className="frame-image">
                             <img src={image !== '' ? image : defaultImageProfile} alt="profile" id="dataImage" title="image-profile"/>
@@ -253,8 +382,10 @@ const Home = React.memo(() => {
                 </div>
 
                 <div className="section-product w-100">
-                    <div className="product-divider w-100"></div>
-                    {category.length > 0 && 
+                    <div className="product-divider w-100">
+                        <div className="product-divider-content w-100"></div>
+                    </div>
+                    {category.length > 0 && search === '' && 
                         <div className="container-category d-flex justify-content-start d-flex w-100 flex-wrap px-4 pt-4 pb-2">
                             <h1 className="headline5 color-green900 font-weight-bold p-0 m-0 w-100">
                                 Kategori Menu
@@ -263,10 +394,22 @@ const Home = React.memo(() => {
                             <Category/>
                         </div>
                     }
-                    
-                    {loading && <Loading/>}
 
-                    {!loading && product.length === 0 && <EmptyState/>}
+                    {!loading && search !== '' && product.length > 0 && 
+                        <div className="container-category d-flex justify-content-start d-flex w-100 flex-wrap px-4 pt-4 pb-2">
+                            <h1 className="headline5 color-green900 font-weight-bold p-0 m-0 w-100">
+                                Hasil Pencarian
+                            </h1>
+                            <p className="headline6 color-green900 px-0 m-0">{product.length} hasil untuk kata kunci “<span className="color-green500 semibold px-0 m-0">{search}</span>”</p>
+                        </div>
+                    }
+                    
+                    {loading && <Loading height={search !== '' ? minHeight : '300px'}/>}
+
+                    {!loading && product.length === 0 && 
+                    <EmptyState minHeight={minHeight} desc={search !== '' ? 
+                        `Maaf “<span class="color-green500 semibold px-0 m-0">${search}</span>” tidak ditemukan coba gunakan kata kunci lain.` : 
+                        'Belum ada menunya nih,</br>Silahkan tambahkan terlebih dahulu!'}/>}
 
                     {!loading && product.length > 0 &&
                         <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-3">
@@ -278,7 +421,7 @@ const Home = React.memo(() => {
             </>
             }
 
-            {notFound && <EmptyState minHeight="600px" title={'Halaman yang kamu tuju tidak ditemukan.'} desc={'Mau pake linknya? <u><a href="https://daftarmenu.com" class="color-green800" target="_blank" rel="noopener noreferrer">Buat daftarmenu sekarang.</a></u>'} icon={require('../assets/icons/not-found.svg')}/>}
+            {notFound && <EmptyState minHeight={minHeight} title={'Halaman yang kamu tuju tidak ditemukan.'} desc={'Mau pake linknya? <a href="https://daftarmenu.com" class="color-green800" target="_blank" rel="noopener noreferrer"><u>Buat daftarmenu sekarang.</u></a>'} icon={require('../assets/icons/not-found.svg')}/>}
             
             {/* modal */}
             <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
@@ -307,9 +450,34 @@ const Home = React.memo(() => {
                                 <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
                                     Deskripsi
                                 </p>
-                                <p className="m-0 caption color-green900 m-0 pt-1 pb-3">
+                                <p className="m-0 caption color-green900 m-0 py-1">
                                     {productDetail.deskripsi}
                                 </p>
+                                <p className="m-0 bodytext1 color-green900 semibold m-0 pt-3">
+                                    Catatan:
+                                </p>
+                                <form id="form-search" className="container-note form-search mt-2">
+                                    <div className="input-group-search bg-white h-100 w-100 input-note">
+                                        <textarea name="" id="" rows={3}  className="w-100 bodytext2 mt-2" onChange={(e) => setNote(e.target.value)} defaultValue={note} placeholder="Masukan catatan"></textarea>
+                                    </div>
+
+                                    <div className="container-qty d-flex justify-content-between flex-row align-items-center my-3">
+                                        <p className="m-0 bodytext1 color-green900 semibold m-0">
+                                            Jumlah
+                                        </p>
+                                        <div className="content-qty d-flex align-items-center flex-row">
+                                            <button onClick={() => qty > 1 && setQty(qty-1)} type="button" className="btn-qty btn-qty-minus bodytext2">-</button>
+                                            <input type="number" maxLength={3} max={999} min={1} onChange={(e) => updateQtyCart(e)} className="text-center input-qty bodytext2 mx-2" value={qty}/>
+                                            <button onClick={() => setQty(qty+1)} type="button" className="btn-qty btn-qty-plus bodytext2">+</button>
+                                        </div>
+                                    </div>
+                                   
+                                    <button onClick={addToCart} className="mb-2 button-message w-100 flex-fill bodytext2 semibold text-white d-flex flex-row justify-content-center align-items-center background-green500" type="button">
+                                        <p className="mb-0 py-1">
+                                            Masukan ke Keranjang
+                                        </p>
+                                    </button>
+                                </form>
                             </>}
                         </div>
                     </div>
@@ -317,6 +485,7 @@ const Home = React.memo(() => {
             </div>
             {/* modal */}
         </main>
+        }
         {!starting && <Footer/>}
         </>
     )

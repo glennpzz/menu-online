@@ -49,3 +49,11 @@ export const validatePhone = (phone : String) : any => {
     var validRegex2 = /^\+[0-9]*$/; // with +
     return phone.match(validRegex) || phone.match(validRegex2);
 }
+
+export const formatMoney = (money : Number) : String => {
+    return money.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
+
+export const getNumber = (str : String) : Number => {
+    return Number(str.replace(/[^0-9]/g, ''));
+}

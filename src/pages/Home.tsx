@@ -105,14 +105,14 @@ const Home = React.memo(() => {
         category : CategoryModel
     }
 
-    const CategoryItem = React.memo((data: CategoryProps) => {
-        let icon = categories.filter((item) => item.id === data.category.id)[0].icon;
+    const CategoryItem = ({category}: CategoryProps) => {
+        let icon = categories.filter((item) => item.id === category.id)[0].icon;
         return (
-            <a onClick={() => selectCategory(data.category.id)} className={`bodytext1 text-decoration-none brand-slide ${categoryIdSelected === data.category.id && 'active'}`} title="daftar-produk">
-                <div className="brand-icon float-left mr-1" style={{backgroundImage : `url(${icon})`}}></div> {data.category.kategori}
+            <a onClick={() => selectCategory(category.id)} className={`bodytext1 text-decoration-none brand-slide ${categoryIdSelected === category.id && 'active'}`} title="daftar-produk">
+                <div className="brand-icon float-left mr-1" style={{backgroundImage : `url(${icon})`}}></div> {category.kategori}
             </a>
         )
-    });
+    }
 
     const Category = () => {
         return (
@@ -164,6 +164,7 @@ const Home = React.memo(() => {
                     Object.assign(categoryItem, ref);
                     newCategory.push(categoryItem);
                 });
+                newCategory.length > 0 && newCategory.unshift({id: 0, kategori:'Semua', icon: iconAll})
                 
                 setCategory(newCategory);
                 setNotFound(false);
@@ -391,7 +392,9 @@ const Home = React.memo(() => {
                                 Kategori Menu
                             </h1>
                             <p className="headline6 color-green900 px-0 m-0">Temukan menu favorit kamu di sini!</p>
-                            <Category/>
+                            <div className="container-brand-text mt-3">
+                                {category.map((category, index) => <CategoryItem category={category} key={index}/>)}
+                            </div>
                         </div>
                     }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams, useParams } from "react-router-dom";
 import axios, {restaurant, products} from '../helper/axios';
 import { slugify } from "../helper/others";
@@ -74,18 +74,29 @@ const Home = React.memo(() => {
     const [qty, setQty] = useState(1);
     const [note, setNote] = useState('');
     const [search, setSearch] = useState('');
+    const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
-    const filterProduct = (slug : number = 0) => {
-        setProduct([]);
+    const totalPage = useRef(1);
+    const page = useRef(1);
+    const masterProduct = useRef<ProductModel[]>([]);
+
+    const filterProduct = (categoryId : number = 0) => {
+        if(categoryIdSelected === categoryId){
+            return;
+        }
+
+        manageProduct([]);
         setLoading(true);
-        if(slug === 0){
+
+        if(categoryId === 0){
             getInformationData();
         }else{
-            axios.get(`${products}?resto=${restoSlug}&kategori=${slug}`)
+            axios.get(`${products}?resto=${restoSlug}&kategori=${categoryId}`)
             .then(response => {
                 let result = response.data;
                 if(result.status){
-                    setProduct(result.data);
+                    manageProduct(result.data);
                 }
                 // console.log(result);
                 setLoading(false);
@@ -152,7 +163,7 @@ const Home = React.memo(() => {
                 setImage(data.cover_resto);
                 setName(data.nama_resto);
                 setAddress(data.alamat);
-                setProduct(data.data_menu_all);
+                manageProduct(data.data_menu_all);
                 changseSize();
 
                 let category : CategoryModel[] = data.data_kategori;
@@ -175,7 +186,7 @@ const Home = React.memo(() => {
                 setName('Tidak ditemukan');
                 setAddress('Tidak ditemukan');
                 setCategory([]);
-                setProduct([]);
+                manageProduct([]);
                 setNotFound(true);
                 setLoading(false);
                 changseSizeNotFound();
@@ -183,10 +194,12 @@ const Home = React.memo(() => {
                 window.location.href = 'https://daftarmenu.com/resto';
             }
             setStarting(false);
+            setIsSearching(false);
         }).catch(error => {
             console.log(error);
             setLoading(false);
             setStarting(false);
+            setIsSearching(false);
         });
     }
 
@@ -294,6 +307,7 @@ const Home = React.memo(() => {
 
     const searchMenu = (keyword : string) => {
         setSearch(keyword);
+        setIsSearching(true);
 
         if(keyword !== ''){
             setLoading(true);
@@ -307,16 +321,18 @@ const Home = React.memo(() => {
                     setName(data.nama_resto);
                     setAddress(data.alamat);
                     let ref = data.data_menu_all.filter((item : ProductModel) => item.nama.toLowerCase().includes(keyword.toLowerCase()));
-                    setProduct(ref);
+                    manageProduct(ref);
                     changseSize();
                     setNotFound(false);
                     setLoading(false);
                 }else{
                     window.location.href = 'https://daftarmenu.com/resto';
                 }
+                setIsSearching(false);
             }).catch(error => {
                 console.log(error);
                 setLoading(false);
+                setIsSearching(false);
             });
         }else{
             getInformationData();
@@ -345,6 +361,59 @@ const Home = React.memo(() => {
         setQty(parseInt(qty));
     }
 
+    const showProduct = (page : number) => {
+        if(masterProduct.current.length > 0){
+            let productData = masterProduct.current;
+            let productDataChunk= [];
+            let chunkSize = 8;
+            for (let i = 0; i < productData.length; i += chunkSize) {
+                productDataChunk.push(productData.slice(i, i + chunkSize));
+            }
+
+            try {
+                if(page === 1){
+                    setProduct(productDataChunk[0]);
+                }else{
+                    setProduct([...product, ...productDataChunk[page - 1]]);
+                }
+            } catch (error) {}
+        }else{
+            setProduct([]);
+        }
+    }
+
+    const manageProduct = (data : ProductModel[]) => {
+        if(data.length > 0){
+            // split data to every 8 item/page
+            let productData = data;
+            let productDataChunk = [];
+            let chunkSize = 8;
+            for (let i = 0; i < productData.length; i += chunkSize) {
+                productDataChunk.push(productData.slice(i, i + chunkSize));
+            }
+            totalPage.current = productDataChunk.length;
+        }else{
+            totalPage.current = 1;
+        }
+        
+        masterProduct.current = data;
+        page.current = 1;
+        showProduct(1); 
+    }
+
+    window.onscroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+            if(page.current < totalPage.current) {
+                setIsLoadingProduct(true);
+                setTimeout(() => {
+                    page.current = page.current + 1;
+                    showProduct(page.current);
+                    setIsLoadingProduct(false);
+                }, 2000);
+            }
+        }
+    }
+
     useEffect(() => {
         // console.log(restoSlug);
         if(restoSlug === undefined){
@@ -360,12 +429,12 @@ const Home = React.memo(() => {
 
     return (
         <>
-        {!notFound && !starting && <Navigation cartCount={cartCount} onSearch={searchMenu}/>}
+        {!notFound && !starting && <Navigation cartCount={cartCount} onSearch={searchMenu} isSearching={isSearching}/>}
         {!starting &&
         <main role="main" className="container-fluid col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12 pt-0 pl-0 pr-0">
             {!starting && !notFound && 
             <>
-                <div style={{backgroundRepeat: 'no-repeat', backgroundPosition: 'right bottom'}} className="container-user d-flex flex-row justify-content-between align-items-center px-3 py-3 background-green500">
+                <div style={{backgroundImage: `url(${require('../assets/images/hero.png')})`,backgroundRepeat: 'repeat', backgroundSize: '200px'}} className="container-user d-flex flex-row justify-content-between align-items-center px-3 py-3 background-green500">
                     <Link className="content-image-profile flex-shrink" to="#" title="profile">
                         <div className="frame-image">
                             <img src={image !== '' ? image : defaultImageProfile} alt="profile" id="dataImage" title="image-profile"/>
@@ -415,9 +484,12 @@ const Home = React.memo(() => {
                         'Belum ada menunya nih,</br>Silahkan tambahkan terlebih dahulu!'}/>}
 
                     {!loading && product.length > 0 &&
+                        <>
                         <div id="container-product" className="container-product d-flex justify-content-start d-flex w-100 flex-wrap px-3">
                             {!loading && product.length > 0 && product.map((product : ProductModel,index : number) => <ProductContent product={product} key={`product-${index}`}/>)}
                         </div>
+                        {isLoadingProduct && <Loading height="100px"/>}
+                        </>
                     }
                     
                 </div>
@@ -429,7 +501,7 @@ const Home = React.memo(() => {
             {/* modal */}
             <div className="modal fade" id="ModalSlide" tabIndex={-1} role="dialog" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-slideout col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12" role="document">
-                    <div className="modal-content">
+                    <div className="modal-content" style={{maxHeight: `${window.innerHeight-80}px`}}>
                         <div className="modal-header d-flex flex-wrap">
                             <h6 className="modal-title semibold headline6 color-black500" id="exampleModalLabel">Detail Menu</h6>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close">

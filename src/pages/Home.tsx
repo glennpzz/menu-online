@@ -25,6 +25,7 @@ import Navigation from "../components/Navigation";
 import CartModel from "../models/CartModel";
 import Swal from "sweetalert2";
 import { getCart, updateCart } from "../helper/session";
+import { ToastBody } from "react-bootstrap";
 
 const Home = React.memo(() => {
     const {restoSlug} = useParams();
@@ -76,7 +77,8 @@ const Home = React.memo(() => {
     const [search, setSearch] = useState('');
     const [isLoadingProduct, setIsLoadingProduct] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    
     const totalPage = useRef(1);
     const page = useRef(1);
     const masterProduct = useRef<ProductModel[]>([]);
@@ -361,7 +363,9 @@ const Home = React.memo(() => {
         setQty(parseInt(qty));
     }
 
-    const showProduct = (page : number) => {
+    const showProduct = (newPage : number) => {
+        page.current = newPage;
+        
         if(masterProduct.current.length > 0){
             let productData = masterProduct.current;
             let productDataChunk= [];
@@ -371,14 +375,16 @@ const Home = React.memo(() => {
             }
 
             try {
-                if(page === 1){
+                if(newPage === 1){
                     setProduct(productDataChunk[0]);
                 }else{
-                    setProduct([...product, ...productDataChunk[page - 1]]);
+                    setProduct([...product, ...productDataChunk[newPage - 1]]);
                 }
             } catch (error) {}
+            setIsLoadingProduct(false);
         }else{
             setProduct([]);
+            setIsLoadingProduct(false);
         }
     }
 
@@ -398,34 +404,42 @@ const Home = React.memo(() => {
         
         masterProduct.current = data;
         page.current = 1;
+        setCurrentPage(1);
         showProduct(1); 
     }
 
-    window.onscroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
-            if(page.current < totalPage.current) {
+    const loadOnScroll = () => {
+        if ((window.innerHeight + document.documentElement.scrollTop) >= (document.documentElement.scrollHeight - 100)) {
+            if(page.current <= totalPage.current) {
+                setCurrentPage(page.current + 1);
                 setIsLoadingProduct(true);
-                setTimeout(() => {
-                    page.current = page.current + 1;
-                    showProduct(page.current);
-                    setIsLoadingProduct(false);
-                }, 2000);
             }
         }
     }
 
+    window.onscroll = () => loadOnScroll();
+
     useEffect(() => {
         // console.log(restoSlug);
-        if(restoSlug === undefined){
-            setNotFound(true);
-            setLoading(false);
-            changseSizeNotFound();
-            setStarting(false);
-        }else{
-            getInformationData();
+        if(starting){
+            if(restoSlug === undefined){
+                setNotFound(true);
+                setLoading(false);
+                changseSizeNotFound();
+                setStarting(false);
+            }else{
+                getInformationData();
+            }
+            changseSize();
         }
-        changseSize();
-    }, [notFound && notFoundEditing && changseSizeNotFound]);
+        
+        if(currentPage > page.current){
+            setTimeout(() => {
+                setIsLoadingProduct(false);
+                showProduct(currentPage);
+            },2000);
+        }
+    }, [notFound && notFoundEditing && changseSizeNotFound, currentPage]);
 
     return (
         <>

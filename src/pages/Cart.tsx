@@ -207,6 +207,7 @@ const Cart = React.memo(() => {
     const sendCart = () => {
         if(getCart(restoSlug).length > 0){
             if(customer !== ''){
+                
                 let message = `Pesanan A.N : ${customer}%0a%0a`;
                 // foraeach with index
                 getCart(restoSlug).forEach((item : CartModel, index : number) => {
